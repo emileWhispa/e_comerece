@@ -32,7 +32,7 @@ class _AccountScreenState extends State<AccountScreen> {
         centerTitle: true,
       ),
       body: ListView(
-        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 30),
         children: <Widget>[
           Align(
             alignment: Alignment.center,
@@ -80,6 +80,7 @@ class _AccountScreenState extends State<AccountScreen> {
             height: 40,
           ),
           CupertinoButton(
+            padding: EdgeInsets.symmetric(horizontal: 10),
             child: Text("Sign up with Phone or Email"),
             onPressed: () {
               Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>Authorization(login: false,)));

@@ -25,6 +25,12 @@ dependencies:
   cupertino_icons: ^0.1.2
   cached_network_image: ^2.0.0-rc
   flutter_vector_icons: ^0.2.1
+  shared_preferences: ^0.5.3+4
+  dio: ^2.1.13
+  contacts_service: ^0.3.10
+  permission_handler: ^3.1.0
+  url_launcher: ^5.0.3
+  intl: ^0.16.1
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +51,22 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
    - assets/image.jpg
+   - assets/home_banner@3x.png
+   - assets/afrishop_logo@3x.png
+   - assets/imag1.JPG
+   - assets/imag2.JPG
+   - assets/imag3.JPG
+   - assets/imag4.JPG
+   - assets/imag5.JPG
+   - assets/imag6.JPG
+   - assets/imag7.JPG
+   - assets/imag8.png
+   - assets/imag9.png
+   - assets/imag10.JPG
+   - assets/home_logo.png
+   - assets/discover.png
+   - assets/cart_logo.png
+   - assets/account.png
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

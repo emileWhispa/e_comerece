@@ -1,11 +1,9 @@
+import 'package:e_comerece/second_homepage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 
 import 'account_screen.dart';
 import 'cart_page.dart';
-import 'category_page.dart';
-import 'homepage.dart';
 
 void main() => runApp(MyApp());
 
@@ -39,6 +37,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int _currentTabIndex = 0;
+  var _cartState = new GlobalKey<CartScreenState>();
 
   @override
   void initState(){
@@ -46,15 +45,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   List<Widget> get _list => [
-        Homepage(
-          callback: (item) {
-            setState(() {
-              _currentTabIndex = 1;
-            });
-          },
-        ),
-        CategoryScreen(),
-        CartScreen(),
+        SecondHomepage(cartState: _cartState,),
+        Center(child: Text("DEVELOPING...",style: TextStyle(fontWeight: FontWeight.bold),),),
+        CartScreen(key: _cartState,),
         AccountScreen(),
       ];
 
@@ -79,13 +72,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           },
           items: [
             BottomNavigationBarItem(
-                icon: Icon(FontAwesome.home), title: Text("Home")),
+                icon: Image.asset("assets/home_logo.png",width: 19,height: 19), title: Text("HOME")),
             BottomNavigationBarItem(
-                icon: Icon(FontAwesome.globe), title: Text("Discover")),
+                icon: Image.asset("assets/discover.png",width: 21,height: 21), title: Text("DISCOVER")),
             BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_cart), title: Text("Cart")),
+                icon: Image.asset("assets/cart_logo.png",width: 19,height: 19), title: Text("CART")),
             BottomNavigationBarItem(
-                icon: Icon(AntDesign.user), title: Text("Account")),
+                icon: Image.asset("assets/account.png",width: 19,height: 19), title: Text("ACCOUNT")),
           ]),
     );
   }
