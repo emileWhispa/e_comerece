@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:e_comerece/description.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
@@ -28,8 +29,8 @@ class CartScreenState extends State<CartScreen> with SuperBase {
   bool _select = false;
 
   Future<void> loadItems() async {
-    await open();
     _control.currentState?.show(atTop: true);
+    await open();
     _list = await Item.itemList(db);
     setState(() {});
     return Future.value();
@@ -162,94 +163,101 @@ class CartScreenState extends State<CartScreen> with SuperBase {
                           decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(3)),
-                          child: Row(
-                            children: <Widget>[
-                              Image(
-                                height: 90,
-                                width: 90,
-                                image: CachedNetworkImageProvider(_item.url),
-                                fit: BoxFit.cover,
-                                loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value: loadingProgress.expectedTotalBytes != null ?
-                                      loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                                          : null,
-                                    ),
-                                  );
-                                },
-                              ),
-                              Expanded(
-                                  child: Container(
-                                height: 90,
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Expanded(
-                                        child: Text(
-                                      _item.title,
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500),
-                                    )),
-                                    Row(
-                                      children: <Widget>[
-                                        Container(
-                                          padding: EdgeInsets.all(5),
-                                          decoration: BoxDecoration(
-                                              color: Color(0xffffe707),
-                                              borderRadius:
-                                                  BorderRadius.circular(5)),
-                                          child: Text(
-                                            '\$${_item.price}',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        Expanded(child: SizedBox.shrink()),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            GestureDetector(
-                                              child: new Icon(
-                                                  Icons.remove_circle_outline),
-                                              onTap: () => setState(() {
-                                                _item.dec();
-                                                _item.updateItem(db);
-                                              }),
-                                            ),
-                                            Padding(padding: EdgeInsets.symmetric(horizontal: 5),child: Text(
-                                              '${_item.items}',
-                                              textAlign: TextAlign.center,
-                                            ),),
-                                            GestureDetector(
-                                              child: new Icon(
-                                                  Icons.add_circle_outline),
-                                              onTap: () {
-                                                setState(() {
-                                                  _item.inc();
-                                                  _item.updateItem(db);
-                                                });
-                                              },
-                                            )
-                                          ],
-                                        )
-                                      ],
-                                    )
-                                  ],
+                          child: InkWell(
+                            onTap: () async {
+                              await Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>Description(item: _item)));
+                              loadItems();
+                            },
+                            child: Row(
+                              children: <Widget>[
+                                Image(
+                                  height: 90,
+                                  width: 90,
+                                  image: CachedNetworkImageProvider(_item.url),
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress.expectedTotalBytes != null ?
+                                        loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                                            : null,
+                                      ),
+                                    );
+                                  },
                                 ),
-                              ))
-                            ],
+                                Expanded(
+                                    child: Container(
+                                  height: 90,
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Expanded(
+                                          child: Text(
+                                        _item.title,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500),
+                                      )),
+                                      Row(
+                                        children: <Widget>[
+                                          Container(
+                                            padding: EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                color: Color(0xffffe707),
+                                                borderRadius:
+                                                    BorderRadius.circular(5)),
+                                            child: Text(
+                                              '\$${_item.price}',
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          Expanded(child: SizedBox.shrink()),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: <Widget>[
+                                              GestureDetector(
+                                                child: new Icon(
+                                                    Icons.remove_circle_outline),
+                                                onTap: () => setState(() {
+                                                  _item.dec();
+                                                  _item.updateItem(db);
+                                                }),
+                                              ),
+                                              Padding(padding: EdgeInsets.symmetric(horizontal: 5),child: Text(
+                                                '${_item.items}',
+                                                textAlign: TextAlign.center,
+                                              ),),
+                                              GestureDetector(
+                                                child: new Icon(
+                                                    Icons.add_circle_outline),
+                                                onTap: () {
+                                                  setState(() {
+                                                    _item.inc();
+                                                    _item.updateItem(db);
+                                                  });
+                                                },
+                                              )
+                                            ],
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ))
+                              ],
+                            ),
                           ),
                         );
+
 
                         return _select
                             ? Row(

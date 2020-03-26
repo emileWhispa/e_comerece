@@ -1,8 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'Partial/TouchableOpacity.dart';
+import 'SuperBase.dart';
 
 class Authorization extends StatefulWidget {
   final bool login;
@@ -12,15 +13,39 @@ class Authorization extends StatefulWidget {
   _AuthorizationState createState() => _AuthorizationState();
 }
 
-class _AuthorizationState extends State<Authorization> {
+class _AuthorizationState extends State<Authorization> with SuperBase {
   bool _isLogin = true;
   bool _checked = true;
+  bool _signing = false;
+  var _formKey = new GlobalKey<FormState>();
+  var _phoneController = new TextEditingController();
+  var _passwordController = new TextEditingController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _isLogin = widget.login;
+  }
+
+  void signUp(){
+    if(_formKey.currentState?.validate() ?? false){
+      setState(() {
+        _signing = true;
+      });
+      this.ajax(url: "login/createUser",method: "POST",map: {
+        "account":_phoneController.text,
+        "captcha":12,
+        "password":_passwordController.text
+      },auth: false,server: true,onValue: (source,url){
+        print(source);
+      },onEnd:
+      (){
+        setState(() {
+          _signing = false;
+        });
+      });
+    }
   }
 
   @override
@@ -147,25 +172,15 @@ class _AuthorizationState extends State<Authorization> {
             ),
           ) :
           Form(
+            key: _formKey,
             child: Container(
               padding: EdgeInsets.all(20),
               child: Column(
                 children: <Widget>[
                   TextFormField(
-                    decoration: InputDecoration(
-                        contentPadding:
-                            EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(5)),
-                        hintText: "Email",
-                        filled: true,
-                        fillColor: Colors.white),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
+                    controller: _phoneController,
+                    inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
+                    keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                         contentPadding:
                             EdgeInsets.symmetric(vertical: 15, horizontal: 15),
@@ -175,26 +190,15 @@ class _AuthorizationState extends State<Authorization> {
                         hintText: "Phone number",
                         filled: true,
                         fillColor: Colors.white),
+                    validator: (str)=>str.isEmpty ? "Phone number required" : null,
                   ),
                   SizedBox(
                     height: 20,
                   ),
                   TextFormField(
-                    decoration: InputDecoration(
-                        contentPadding:
-                            EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(5)),
-                        hintText: "Username",
-                        filled: true,
-                        fillColor: Colors.white),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
+                    controller: _passwordController,
                     obscureText: true,
+                    validator: (str)=>str.isEmpty ? "Password field required" : null,
                     decoration: InputDecoration(
                         contentPadding:
                             EdgeInsets.symmetric(vertical: 15, horizontal: 15),
@@ -211,6 +215,7 @@ class _AuthorizationState extends State<Authorization> {
                   ),
                   TextFormField(
                     obscureText: true,
+                    validator: (str)=>str == _passwordController.text ? null : "Confirm password does not match",
                     decoration: InputDecoration(
                         contentPadding:
                             EdgeInsets.symmetric(vertical: 15, horizontal: 15),
@@ -262,11 +267,11 @@ class _AuthorizationState extends State<Authorization> {
                     ],
                   ),
                   SizedBox(height: 30),
-                  SizedBox(
+                  _signing ? loadBox() : SizedBox(
                     width: double.infinity,
                     child: CupertinoButton(
                       child: Text("SIGN IN"),
-                      onPressed: () {},
+                      onPressed: signUp,
                       color: Color(0xffffe707),
                     ),
                   )

@@ -1,3 +1,4 @@
+import 'package:e_comerece/Staggered.dart';
 import 'package:e_comerece/second_homepage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -46,8 +47,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   List<Widget> get _list => [
         SecondHomepage(cartState: _cartState,),
-        Center(child: Text("DEVELOPING...",style: TextStyle(fontWeight: FontWeight.bold),),),
-        CartScreen(key: _cartState,),
+    //    Center(child: Text("DEVELOPING...",style: TextStyle(fontWeight: FontWeight.bold),),),
+    Staggered(),
+    CartScreen(key: _cartState,),
         AccountScreen(),
       ];
 

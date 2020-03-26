@@ -1,40 +1,49 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:e_comerece/Json/Product.dart';
-import 'package:e_comerece/Json/SubCategory.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:e_comerece/Partial/TouchableOpacity.dart';
+import 'package:e_comerece/category_page_old.dart';
 import 'package:e_comerece/description.dart';
-import 'package:e_comerece/detail_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import 'Json/Brand.dart';
 import 'SuperBase.dart';
 import 'item.dart';
 import 'cart_page.dart';
 
+class Choice{
+  final String name;
+  final String address;
+
+  Choice(this.name, this.address);
+}
+
 class SecondHomepage extends StatefulWidget {
   final GlobalKey<CartScreenState> cartState;
 
-  const SecondHomepage({Key key,@required this.cartState}) : super(key: key);
+  const SecondHomepage({Key key, @required this.cartState}) : super(key: key);
+
   @override
   _SecondHomepageState createState() => _SecondHomepageState();
 }
 
 class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
-  Widget _brand(String title) {
+  Widget _brand(String title,{Color color:const Color(0xfffbd858)}) {
     return Container(
-      margin: EdgeInsets.only(top: 60, bottom: 30),
+      margin: EdgeInsets.symmetric(vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text("#", style: TextStyle(fontSize: 22, color: Color(0xfffbd858))),
+          Text("#", style: TextStyle(fontSize: 22, color: color)),
           Text(
             title,
             style: TextStyle(fontSize: 25, color: Color(0xff4d4d4d)),
           ),
-          Text("#", style: TextStyle(fontSize: 22, color: Color(0xfffbd858))),
+          Text("#", style: TextStyle(fontSize: 22, color: color)),
         ],
       ),
     );
@@ -44,7 +53,6 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
 
   List<Item> _items = [];
   List<String> _urls = [];
-
 
   int max;
   int current = 0;
@@ -95,16 +103,17 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
     });
 
     _controller.addListener(() {
-        if (_controller.position.pixels == _controller.position.maxScrollExtent) {
-          _refreshList(inc: true);
-          print("reached bottom ($current)");
-        }
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        _refreshList(inc: true);
+        print("reached bottom ($current)");
+      }
     });
   }
 
   Future<void> _loadBrands() {
     return this.ajax(
         url: "brands/list",
+        auth: false,
         onValue: (source, url) {
           Iterable _map = json.decode(source);
           setState(() {
@@ -117,7 +126,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
   }
 
   Future<void> _loadItems({bool inc: false}) {
-    if (max != null && current > max ) {
+    if (max != null && current > max) {
       return Future.value();
     }
     current += inc ? 1 : 0;
@@ -126,12 +135,12 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
     });
     return this.ajax(
         url:
-            "https://dev.diaosaas.com/zion/itemStation/queryAll?pageNum=$current&pageSize=6",
+            "https://dev.diaosaas.com/zion/itemStation/queryAll?pageNum=$current&pageSize=12",
         absolutePath: true,
         auth: false,
-        server: true,
+        localSave: true,
         onValue: (source, url) {
-          if( _urls.contains(url) ){
+          if (_urls.contains(url)) {
             return;
           }
           _urls.add(url);
@@ -143,14 +152,12 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
             _items.addAll(_map.map((f) => Item.fromJson(f)).toList());
           });
         },
-        onEnd: (){
+        onEnd: () {
           setState(() {
             _loading = false;
           });
         },
-        error: (s, v) {
-
-        });
+        error: (s, v) {});
   }
 
   List<Brand> get _brands => [
@@ -168,10 +175,28 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
     return Future.value();
   }
 
+  int _current = 0;
+
+  List<String> get images => [
+        "https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/s750x750/90094163_668596227229872_5716959898011183998_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=100&_nc_ohc=reIR9obOxqMAX-vleTp&oh=c9f7bce7a57c4489b669c6152bb46754&oe=5EA0FF58",
+        "https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/s750x750/90094163_668596227229872_5716959898011183998_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=100&_nc_ohc=reIR9obOxqMAX-vleTp&oh=c9f7bce7a57c4489b669c6152bb46754&oe=5EA0FF58",
+        "https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/s750x750/90085939_280835336244880_7349924919496944527_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=104&_nc_ohc=2uxLqlnLTgQAX8W8oKR&oh=48987b46f23db1aa0d1bb703c0821096&oe=5EA092F6",
+        "https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/s750x750/87601194_534367677201075_7891038534720558185_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=103&_nc_ohc=LwRNdchHqo4AX-UHheM&oh=2cc2ece1e5c73f21db176edf5402270d&oe=5E9DC811",
+        "https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/s750x750/87217612_496685841234077_5209662721745286314_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=105&_nc_ohc=b4jtZZhqwysAX8wgeJn&oh=57f7f6bb9d340f6910a4078eaaa477b1&oe=5E9F1EC1"
+      ];
+
+  List<String> get _logos => [
+        "https://therockbury.com/wp-content/uploads/2014/03/HM-logo.jpg",
+        "https://coatsdigital.com/wp-content/uploads/2015/03/adidas-logo.png",
+        "https://www.fashionabc.org/wp-content/uploads/2019/08/zara-square-logo-300x300.jpg",
+        "https://uniqgiftvoucher.com/ugvwp/wp-content/uploads/2019/08/Puma-Logo.png",
+        "https://i.insider.com/53d29d5c6bb3f7a80617ada8?width=1100&format=jpeg&auto=webp",
+      ];
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    var _len = _items.length + (_loading ? 13 : 12);
+    var _len = 1 + (_loading ? 13 : 12);
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -180,114 +205,273 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
               displacement: 80,
               child: Scrollbar(
                   child: ListView.builder(
+                      padding: EdgeInsets.only(top: 80),
                       controller: _controller,
                       itemCount: _len,
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          return Image.asset("assets/home_banner@3x.png");
+                          return Stack(children: [
+                            CarouselSlider.builder(
+                              height: 230,
+                              itemBuilder: (context, i) {
+                                return Container(
+                                  width: double.infinity,
+                                  color: Colors.primaries[Random()
+                                      .nextInt(Colors.primaries.length)],
+                                  child: i == 0
+                                      ? Image.asset(
+                                          "assets/home_banner@3x.png",
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image(
+                                          image:CachedNetworkImageProvider(images[i]),
+                                          fit: BoxFit.fitWidth,
+                                          frameBuilder: (BuildContext context,
+                                              Widget child,
+                                              int frame,
+                                              bool wasSynchronouslyLoaded) {
+                                            if (frame == null)
+                                              return Container(
+                                                height: double.infinity,
+                                                child: Center(
+                                                  child:
+                                                      CupertinoActivityIndicator(),
+                                                ),
+                                              );
+                                            return child;
+                                          },
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return Container(
+                                                height: double.infinity,
+                                                child: Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    value: loadingProgress
+                                                                .expectedTotalBytes !=
+                                                            null
+                                                        ? loadingProgress
+                                                                .cumulativeBytesLoaded /
+                                                            loadingProgress
+                                                                .expectedTotalBytes
+                                                        : null,
+                                                  ),
+                                                ));
+                                          },
+                                        ),
+                                );
+                              },
+                              itemCount: images.length,
+                              autoPlay: true,
+                              aspectRatio: 2.0,
+                              viewportFraction: 1.1,
+                              onPageChanged: (index) {
+                                setState(() {
+                                  _current = index;
+                                });
+                              },
+                            ),
+                            Positioned(
+                                bottom: 0.0,
+                                left: 0.0,
+                                right: 0.0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children:
+                                      List.generate(images.length, (index) {
+                                    return Container(
+                                      width: 8.0,
+                                      height: 8.0,
+                                      margin: EdgeInsets.symmetric(
+                                          vertical: 10.0, horizontal: 2.0),
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: _current == index
+                                              ? Color.fromRGBO(0, 0, 0, 0.9)
+                                              : Color.fromRGBO(0, 0, 0, 0.4)),
+                                    );
+                                  }),
+                                ))
+                          ]);
                         }
 
                         if (index == 1) {
-                          return _row("MEN", "WOMEN");
-                        }
-
-                        if (index == 2) {
-                          return _row("CHILDREN", "AFRIHOME");
-                        }
-
-                        if (index == 3) {
-                          return _row("COSMETICS", "ELECTRONICS");
-                        }
-
-                        if (index == 4) {
-                          return _row("HAIR", "SPORTSWEAR");
-                        }
-
-                        if (index == 5) {
-                          return _brand("NEW ARRIVALS");
+                          return Container(
+                            margin: EdgeInsets.symmetric(vertical: 20),
+                            child: Column(
+                              children: <Widget>[
+                                Row(
+                                  children: [
+                                    Choice("Men", "https://cdn.shopify.com/s/files/1/1083/6796/products/product-image-907350420_1024x1024.jpg?v=1571439643"),
+                                    Choice("Women", "https://i.pinimg.com/originals/18/45/69/1845698cafa91c626a861c84974de35c.jpg"),
+                                    Choice("Children", "https://shop.r10s.jp/angeliebe/cabinet/baby-19aw/s/50985_s.jpg"),
+                                    Choice("Afrihome", "https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/p750x750/84535995_791866094655814_2932203803652796901_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=110&_nc_ohc=J7WDulYzj08AX8WB7FW&oh=1f32a4815b609c7fdea35bb901e7ed16&oe=5E9F6074"),
+                                  ]
+                                      .map((f) => Expanded(
+                                              child: Container(
+                                            child: Column(
+                                              children: <Widget>[
+                                                CircleAvatar(
+                                                  radius: 30,
+                                                  backgroundColor: color,
+                                                  backgroundImage: CachedNetworkImageProvider(f.address),
+                                                ),
+                                                SizedBox(height: 7),
+                                                Text(
+                                                  f.name,
+                                                  style:
+                                                      TextStyle(fontSize: 12.5),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                )
+                                              ],
+                                            ),
+                                          )))
+                                      .toList(),
+                                ),
+                                SizedBox(height: 18),
+                                Row(
+                                  children: [
+                                    Choice("Cosmetics", "https://shatelcosmetics.com/wp-content/uploads/2017/06/cosmetic-png-1.png"),
+                                    Choice("Electronics", "https://ksassets.timeincuk.net/wp/uploads/sites/54/2019/03/Xiaomi-Mi-9-front-angled-top-left-1024x683.jpg"),
+                                    Choice("Hair", "https://main-cdn.grabone.co.nz/goimage/fullsize/6c0f1cd498157e4d7352f3600f29c6f90cc9c80b.jpg"),
+                                    Choice("View all", "https://shatelcosmetics.com/wp-content/uploads/2017/06/cosmetic-png-1.png"),
+                                  ]
+                                      .map((f) => Expanded(
+                                              child: GestureDetector(
+                                                onTap: (){
+                                                    Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>CategoryScreen()));
+                                                },
+                                                child: Container(
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      CircleAvatar(
+                                                        backgroundColor: f.name == "View all" ? color : Colors.grey,
+                                                        radius: 30,
+                                                        backgroundImage: f.name == "View all" ? null : CachedNetworkImageProvider(f.address),
+                                                        child: f.name == "View all"
+                                                            ? Icon(Icons.more_horiz)
+                                                            : null,
+                                                      ),
+                                                      SizedBox(height: 7),
+                                                      Text(
+                                                        f.name,
+                                                        style:
+                                                        TextStyle(fontSize: 12.5),
+                                                        maxLines: 1,
+                                                        overflow:
+                                                        TextOverflow.ellipsis,
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              )))
+                                      .toList(),
+                                ),
+                              ],
+                            ),
+                          );
                         }
 
                         if (index == 6) {
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 20),
-                            child: Image.asset("assets/imag1.JPG"),
+                          return Container(
+                            color: color,
+                            child: Column(
+                              children: <Widget>[
+                                SizedBox(height: 10),
+                                _brand("OUR BRANDS"),
+                                Container(
+                                  margin: EdgeInsets.symmetric(vertical: 10),
+                                  padding: EdgeInsets.symmetric(vertical: 10),
+                                  height: 110,
+                                  color: color,
+                                  child: ListView.builder(
+                                      itemCount: _logos.length,
+                                      scrollDirection: Axis.horizontal,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: EdgeInsets.all(4),
+                                          child: Container(
+                                            height: 30,
+                                            width: 83,
+                                            margin: EdgeInsets.only(right: 7),
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                      color: Colors.black26,
+                                                      offset: Offset(1.0, 1.0),
+                                                      //(x,y)
+                                                      blurRadius: 2.0,
+                                                      spreadRadius: 0.4),
+                                                ],
+                                                shape: BoxShape.circle,
+                                                image: DecorationImage(
+                                                    fit: BoxFit.cover,
+                                                    image:
+                                                    CachedNetworkImageProvider(_logos[index]))),
+                                          ),
+                                        );
+                                      }),
+                                )
+                              ],
+                            ),
                           );
+                        }
+
+                        if (index == 3) {
+                          return Container(height: 400,
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(child: Column(
+                                children: <Widget>[
+
+                                  Expanded(flex:2,child: CachedNetworkImage(imageUrl:"https://instagram.fkgl2-1.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/p750x750/88276752_499840260642764_7350772599357048630_n.jpg?_nc_ht=instagram.fkgl2-1.fna.fbcdn.net&_nc_cat=108&_nc_ohc=YJkIuN6175YAX-TOp_m&oh=73ab09f82185538fe39d0dba857d03bb&oe=5E9CBF13",fit: BoxFit.cover,width: double.infinity)),
+                                  Expanded(child: CachedNetworkImage(imageUrl:"https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/s750x750/84469624_614160582759889_3703883138521319034_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=101&_nc_ohc=xmQx6_OOSNYAX996J2-&oh=f8327c464a2c53ca9adcb1a8829d65d7&oe=5EB44F1A",fit: BoxFit.cover,width: double.infinity))
+                                ],
+                              )),
+                              //
+                              Expanded(child: Column(children: <Widget>[
+                                Expanded(child: CachedNetworkImage(imageUrl:"https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/e35/84332618_3269096726467681_4340622738987114260_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=101&_nc_ohc=r9vwGo9SF9IAX_I_7eq&oh=b905727add5ce6627aac11522acf29f0&oe=5E9DB962",fit: BoxFit.cover,width: double.infinity,)),
+                                Expanded(child: CachedNetworkImage(imageUrl:"https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/e35/83199139_644795539628765_840347403361876644_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=105&_nc_ohc=6qgLz5_NBCIAX-3uo9w&oh=cc6a7e59bde4ffa51ccda08aaadae459&oe=5EA92B14",fit: BoxFit.cover,width: double.infinity,)),
+                                Expanded(child: CachedNetworkImage(imageUrl:"https://instagram.fkgl2-1.fna.fbcdn.net/v/t51.2885-15/e15/80889137_479341809671387_4517166186896271078_n.jpg?_nc_ht=instagram.fkgl2-1.fna.fbcdn.net&_nc_cat=111&_nc_ohc=V5Mr734x7t4AX9-YtCH&oh=f25734ae55b54c107b7b63af310c1772&oe=5EA81FE4",fit: BoxFit.cover,width: double.infinity,))
+                              ],))
+                            ],
+                          ),);
+                        }
+
+                        if (index == 4) {
+                          return Container();
+                        }
+
+                        if (index == 2) {
+                          return _brand("NEW ARRIVALS");
+                        }
+
+                        if (index == 5) {
+                          return Container();
                         }
 
                         if (index == 7) {
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 20),
-                            child: Image.asset("assets/imag2.JPG"),
-                          );
+                          return Container();
                         }
 
                         if (index == 8) {
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 20),
-                            child: Image.asset("assets/imag3.JPG"),
-                          );
+                          return Container();
                         }
 
                         if (index == 9) {
-                          return _brand("OTHER BRANDS");
+                          return Container();
                         }
 
                         if (index == 10) {
                           return Container(
                             decoration: BoxDecoration(
                               color: Color(0xffffe707),
-                            ),
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                            child: Column(
-                              children: <Widget>[
-                                GridView.builder(
-                                  itemCount:
-                                      _brands.length > 4 ? 4 : _brands.length,
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2,
-                                          childAspectRatio: 2.4 / 4,
-                                          mainAxisSpacing: 4.0,
-                                          crossAxisSpacing: 4.0),
-                                  itemBuilder: (context, index) {
-                                    return Column(
-                                      children: <Widget>[
-                                        Container(
-                                            constraints:
-                                                BoxConstraints(minHeight: 150),
-                                            decoration: BoxDecoration(
-                                                color: Colors.white),
-                                            margin: EdgeInsets.symmetric(
-                                                horizontal: 5, vertical: 5),
-                                            child: Image.asset(
-                                              _brands[index].url,
-                                              fit: BoxFit.cover,
-                                            )),
-                                        SizedBox(height: 5),
-                                        Expanded(
-                                            child: Text(
-                                          _brands[index].name,
-                                          textAlign: TextAlign.center,
-                                          style:
-                                              Theme.of(context).textTheme.title,
-                                        )),
-                                      ],
-                                    );
-                                  },
-                                ),
-                                TouchableOpacity(
-                                    child: Container(
-                                  color: Colors.white,
-                                  margin: EdgeInsets.all(10),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 30, vertical: 20),
-                                  child: Center(
-                                    child: Text("VIEW MORE"),
-                                  ),
-                                ))
-                              ],
                             ),
                           );
                         }
@@ -296,42 +480,109 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                           return _brand("HOT SALES");
                         }
 
-                        if( index == _len - 1  && _loading){
-                          return Center(child:SizedBox(
-                            height: 40,
-                            width: 40,
-                            child:  CircularProgressIndicator()),
+                        if (index == _len - 1 && _loading) {
+                          return Center(
+                            child: Padding(
+                                padding: EdgeInsets.all(10),
+                                child: SizedBox(
+                                  height: 30,
+                                  width: 30,
+                                  child: CircularProgressIndicator(),
+                                )),
                           );
                         }
 
                         index = index - 12;
 
-                        if (_items.length ~/ 3 < index) return Container();
+                        //if (_items.length ~/ 3 < index) return Container();
 
-                        return Row(
-                          children: <Widget>[
-                            Expanded(
-                                child: _gridItem(
-                                    "FASHION PLEATED TOP FRIEND",
-                                    "https://images-na.ssl-images-amazon.com/images/I/51iYRa329DL._SL1024_.jpg",
-                                    200,
-                                    index: index,
-                                    count: 0)),
-                            Expanded(
-                                child: _gridItem(
-                                    "FASHION PLEATED TOP FRIEND",
-                                    "https://s7d5.scene7.com/is/image/UrbanOutfitters/55958102_069_b?\$medium\$&qlt=80&fit=constrain",
-                                    178,
-                                    index: index,
-                                    count: 1)),
-                            Expanded(
-                                child: _gridItem(
-                                    "FASHION PLEATED TOP FRIEND",
-                                    "https://lp2.hm.com/hmgoepprod?set=width[800],quality[80],options[limit]&source=url[https://www2.hm.com/content/dam/campaign-ladies-s01/februari-2020/1301a/1301-3x2-weekend-style-forerver.jpg]&scale=width[global.width],height[15000],options[global.options]&sink=format[jpg],quality[global.quality]",
-                                    187,
-                                    index: index,
-                                    count: 2)),
-                          ],
+                        return StaggeredGridView.countBuilder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.all(5),
+                          crossAxisCount: 4,
+                          itemCount: _items.length,
+                          itemBuilder: (BuildContext context, int index) => GestureDetector(
+                            onTap: ()async{
+                              await Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>Description(item: _items[index],)));
+                              widget.cartState.currentState?.loadItems();
+                              },
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Container(
+                                    margin: EdgeInsets.all(2.0),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: Colors.white,
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Color(0xffE0E0E0).withOpacity(0.6),
+                                            offset: Offset(0.0, .35), //(x,y)
+                                            blurRadius: 3.0,
+                                            spreadRadius: 0.4),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(5.0),
+                                              topRight: Radius.circular(5.0)),
+                                          child: Image(
+                                            image:CachedNetworkImageProvider(_items[index].url),
+                                            fit: BoxFit.fitWidth,
+                                            frameBuilder: (BuildContext context, Widget child,
+                                                int frame, bool wasSynchronouslyLoaded) {
+                                              if (frame == null)
+                                                return Container(
+                                                  height: 150,
+                                                  child: Center(
+                                                    child: CupertinoActivityIndicator(),
+                                                  ),
+                                                );
+                                              return child;
+                                            },
+                                            loadingBuilder: (BuildContext context, Widget child,
+                                                ImageChunkEvent loadingProgress) {
+                                              if (loadingProgress == null) return child;
+                                              return Container(
+                                                  height: 150,
+                                                  child: Center(
+                                                    child: CircularProgressIndicator(
+                                                      value: loadingProgress
+                                                          .expectedTotalBytes !=
+                                                          null
+                                                          ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                          loadingProgress.expectedTotalBytes
+                                                          : null,
+                                                    ),
+                                                  ));
+                                            },
+                                          ),
+                                        ),
+                                        Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 5, horizontal: 5),
+                                            child: Text(
+                                              _items[index].title,
+                                              maxLines: 2,overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(fontSize: 12),
+                                            )),
+                                        Padding(
+                                            padding:
+                                            EdgeInsets.only(bottom: 7, right: 5, left: 5),
+                                            child: Text(
+                                              '\$${_items[index].price}',
+                                              style: TextStyle(fontSize: 17,fontWeight: FontWeight.w700),
+                                            )),
+                                      ],
+                                    ))),
+                          ),
+                          staggeredTileBuilder: (int index) => new StaggeredTile.fit(2),
+                          mainAxisSpacing: 2.0,
+                          crossAxisSpacing: 2.0,
                         );
                       })),
               onRefresh: _refreshList),
@@ -379,10 +630,9 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
         ? Container()
         : TouchableOpacity(
             padding: EdgeInsets.all(5),
-            onTap: () async{
+            onTap: () async {
               await Navigator.of(context).push(CupertinoPageRoute(
-                  builder: (context) => Description(
-                      item: _items[index])));
+                  builder: (context) => Description(item: _items[index])));
               widget.cartState.currentState?.loadItems();
             },
             child: Container(
@@ -397,16 +647,18 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                     child: Image(
                       image: CachedNetworkImageProvider('${_items[index].url}'),
                       fit: BoxFit.cover,
-                        loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null ?
-                              loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                                  : null,
-                            ),
-                          );
-                        },
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes
+                                : null,
+                          ),
+                        );
+                      },
                     ),
                   )),
                   SizedBox(height: 5),
