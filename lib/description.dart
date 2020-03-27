@@ -5,6 +5,7 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:share/share.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'Coupon.dart';
 import 'SuperBase.dart';
 import 'item.dart';
 
@@ -258,24 +259,29 @@ class _DescriptionState extends State<Description> with SuperBase {
                           SizedBox(
                             height: 40,
                           ),
-                          Row(
-                            children: <Widget>[
-                              Text(
-                                "Coupons",
-                                style: TextStyle(
-                                    fontSize: 17, fontWeight: FontWeight.w600),
-                              ),
-                              Spacer(),
-                              Text(
-                                "Select",
-                                style: TextStyle(color: Colors.grey, fontSize: 16),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                color: Colors.grey,
-                                size: 20,
-                              )
-                            ],
+                          InkWell(
+                            onTap: (){
+                              Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>Coupon()));
+                            },
+                            child: Row(
+                              children: <Widget>[
+                                Text(
+                                  "Coupons",
+                                  style: TextStyle(
+                                      fontSize: 17, fontWeight: FontWeight.w600),
+                                ),
+                                Spacer(),
+                                Text(
+                                  "Select",
+                                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.grey,
+                                  size: 20,
+                                )
+                              ],
+                            ),
                           )
                         ],
                       ),
