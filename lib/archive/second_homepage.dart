@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:e_comerece/Json/Product.dart';
 import 'package:e_comerece/Partial/TouchableOpacity.dart';
 import 'package:e_comerece/description.dart';
+import 'package:e_comerece/old_category.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -51,33 +53,38 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
   Widget _row(String title, String title2) {
     final style = TextStyle(
         color: Color(0xffe8c854), fontSize: 18, fontStyle: FontStyle.italic);
-    return Container(
-      margin: EdgeInsets.only(top: 20),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-              child: Container(
-            padding: EdgeInsets.all(20),
-            color: Color(0xff333333),
-            child: Center(
-                child: Text(
-              title,
-              style: style,
-            )),
-          )),
-          Expanded(
-              child: Container(
-            padding: EdgeInsets.all(20),
-            margin: EdgeInsets.only(left: 3),
-            color: Color(0xff333333),
-            child: Center(
-              child: Text(
-                title2,
+    return InkWell(
+      onTap: (){
+        Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>OldCategory()));
+      },
+      child: Container(
+        margin: EdgeInsets.only(top: 20),
+        child: Row(
+          children: <Widget>[
+            Expanded(
+                child: Container(
+              padding: EdgeInsets.all(20),
+              color: Color(0xff333333),
+              child: Center(
+                  child: Text(
+                title,
                 style: style,
+              )),
+            )),
+            Expanded(
+                child: Container(
+              padding: EdgeInsets.all(20),
+              margin: EdgeInsets.only(left: 3),
+              color: Color(0xff333333),
+              child: Center(
+                child: Text(
+                  title2,
+                  style: style,
+                ),
               ),
-            ),
-          )),
-        ],
+            )),
+          ],
+        ),
       ),
     );
   }
@@ -101,7 +108,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
 
   Future<void> _loadBrands() {
     return this.ajax(
-        url: "brands/list",
+        url: "listBrands",
         auth: false,
         onValue: (source, url) {
           Iterable _map = json.decode(source);
@@ -152,10 +159,10 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
   }
 
   List<Brand> get _brands => [
-        Brand("H&M", "assets/imag4.JPG"),
-        Brand("NIKE", "assets/imag5.JPG"),
-        Brand("ZARA", "assets/imag6.JPG"),
-        Brand("ADIDAS", "assets/imag7.JPG"),
+        Brand("H&M", "assets/imag4.jpg"),
+        Brand("NIKE", "assets/imag5.jpg"),
+        Brand("ZARA", "assets/imag6.jpg"),
+        Brand("ADIDAS", "assets/imag7.jpg"),
       ];
 
   Future<void> _refreshList({bool inc: false}) {
@@ -206,23 +213,38 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                         }
 
                         if (index == 6) {
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 20),
-                            child: Image.asset("assets/imag1.JPG"),
+                          return InkWell(
+                            onTap: (){
+                              Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>OldCategory()));
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 20),
+                              child: Image.asset("assets/imag1.jpg"),
+                            ),
                           );
                         }
 
                         if (index == 7) {
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 20),
-                            child: Image.asset("assets/imag2.JPG"),
+                          return InkWell(
+                            onTap: (){
+                              Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>OldCategory()));
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 20),
+                              child: Image.asset("assets/imag2.jpg"),
+                            ),
                           );
                         }
 
                         if (index == 8) {
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 20),
-                            child: Image.asset("assets/imag3.JPG"),
+                          return InkWell(
+                            onTap: (){
+                              Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>OldCategory()));
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 20),
+                              child: Image.asset("assets/imag3.jpg"),
+                            ),
                           );
                         }
 
@@ -378,9 +400,10 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
         : TouchableOpacity(
             padding: EdgeInsets.all(5),
             onTap: () async{
+              var _pro = _items[index];
               await Navigator.of(context).push(CupertinoPageRoute(
                   builder: (context) => Description(
-                      item: _items[index])));
+                      product: Product(_pro.title, _pro.price, _pro.url,_pro.count))));
               widget.cartState.currentState?.loadItems();
             },
             child: Container(

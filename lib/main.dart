@@ -1,10 +1,15 @@
 import 'package:e_comerece/Staggered.dart';
-import 'package:e_comerece/second_homepage.dart';
+import 'package:e_comerece/second_account_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'Json/User.dart';
+import 'SuperBase.dart';
 import 'account_screen.dart';
+import 'archive/second_homepage.dart';
 import 'cart_page.dart';
+import 'discover.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,9 +17,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: Colors.transparent));
     return MaterialApp(
       title: 'Afrishop',
-      theme: ThemeData(primaryColor: Color(0xffffe707)),
+      theme: ThemeData(primaryColor: Color(0xffffe707), fontFamily: 'Karla'),
       home: MyHomePage(),
     );
   }
@@ -36,20 +43,39 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+class _MyHomePageState extends State<MyHomePage>
+    with TickerProviderStateMixin, SuperBase {
   int _currentTabIndex = 0;
   var _cartState = new GlobalKey<CartScreenState>();
+  User _user;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      this.signedIn((token, user) => this._addUser(user), () {});
+    });
   }
 
+  void _addUser(User user) {
+    setState(() {
+      _user = user;
+      _accountKey.currentState?.populate(user);
+    });
+  }
+
+  var _accountKey = new GlobalKey<SecondAccountScreenState>();
+
   List<Widget> get _list => [
-        SecondHomepage(cartState: _cartState,),
-    //    Center(child: Text("DEVELOPING...",style: TextStyle(fontWeight: FontWeight.bold),),),
-    Staggered(),
-    CartScreen(key: _cartState,),
+        SecondHomepage(cartState: _cartState),
+//        Center(
+//          child: Text(
+//            "DEVELOPING...",
+//            style: TextStyle(fontWeight: FontWeight.bold),
+//          ),
+//        ),
+    Discover(),
+        CartScreen(user: _user),
         AccountScreen(),
       ];
 
@@ -65,7 +91,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       body: IndexedStack(children: _list,index: _currentTabIndex,),
       bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.grey,
           iconSize: 18,
+          unselectedFontSize: 11,
+          selectedFontSize: 11,
           currentIndex: _currentTabIndex,
           onTap: (index) {
             setState(() {
@@ -74,13 +104,48 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           },
           items: [
             BottomNavigationBarItem(
-                icon: Image.asset("assets/home_logo.png",width: 19,height: 19), title: Text("HOME")),
+                icon: Container(
+                    margin: EdgeInsets.only(bottom: 6, top: 3),
+                    child: Image.asset(
+                        "assets/home${_currentTabIndex == 0 ? "_" : ""}.png",
+                        width: 23,
+                        fit: BoxFit.fitHeight,
+                        height: 23)),
+                title: Text("HOME",
+                    style: TextStyle(fontWeight: FontWeight.bold))),
             BottomNavigationBarItem(
-                icon: Image.asset("assets/discover.png",width: 21,height: 21), title: Text("DISCOVER")),
+                icon: Container(
+                    margin: EdgeInsets.only(bottom: 6, top: 3),
+                    child: Image.asset(
+                        "assets/discover${_currentTabIndex == 1 ? "_" : ""}.png",
+                        width: 31,
+                        fit: BoxFit.fitHeight,
+                        height: 23)),
+                title: Text(
+                  "DISCOVER",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                )),
             BottomNavigationBarItem(
-                icon: Image.asset("assets/cart_logo.png",width: 19,height: 19), title: Text("CART")),
+                icon: Container(
+                    margin: EdgeInsets.only(bottom: 6, top: 3),
+                    child: Image.asset(
+                        "assets/cart${_currentTabIndex == 2 ? "_" : ""}.png",
+                        width: 24,
+                        fit: BoxFit.fitHeight,
+                        height: 23)),
+                title: Text("CART",
+                    style: TextStyle(fontWeight: FontWeight.bold))),
             BottomNavigationBarItem(
-                icon: Image.asset("assets/account.png",width: 19,height: 19), title: Text("ACCOUNT")),
+                icon: Container(
+                    margin: EdgeInsets.only(bottom: 6, top: 3),
+                    child: Image.asset(
+                        "assets/account${_currentTabIndex == 3 ? "_" : ""}.png",
+                        width: 23,
+                        height: 23)),
+                title: Text(
+                  "ACCOUNT",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                )),
           ]),
     );
   }

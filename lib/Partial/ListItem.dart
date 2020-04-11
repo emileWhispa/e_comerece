@@ -56,7 +56,7 @@ class _ListItemState extends State<ListItem> with SuperBase {
 
   @override
   Widget build(BuildContext context) {
-    var im = AssetImage("assets/avatar04.png");
+    var im = AssetImage("assets/boys.jpg");
     var height = MediaQuery.of(context).size.width;
     // TODO: implement build
     return Column(

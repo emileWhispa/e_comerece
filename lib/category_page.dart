@@ -34,7 +34,7 @@ class _CategoryScreenState extends State<CategoryScreen>
   Future<void> _loadCategories() {
     _refreshControlOne.currentState?.show(atTop: true);
     return this.ajax(
-        url: "categories/list",
+        url: "listCategories?page=0&size=20",
         onValue: (source, url) {
           Iterable _map = json.decode(source);
           setState(() {
@@ -48,7 +48,7 @@ class _CategoryScreenState extends State<CategoryScreen>
     if (_active == null) return Future.value();
     _refreshControlTwo.currentState?.show(atTop: true);
     return this.ajax(
-        url: "sub_categories/by/category/${_active.id}/",
+        url: "listSubCategoryByCategory/${_active.id}",
         onValue: (source, url) {
           Iterable _map = json.decode(source);
           setState(() {

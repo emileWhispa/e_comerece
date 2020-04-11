@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "566420392439",
+    "firebase_url": "https://afrishop-6e142.firebaseio.com",
+    "project_id": "afrishop-6e142",
+    "storage_bucket": "afrishop-6e142.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:566420392439:android:342e9a29172a1ce96246f2",
+        "android_client_info": {
+          "package_name": "net.afrix.e_comerece"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "566420392439-flkpb084npen3qiskg7bffff5e6r74cn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.afrix.e_comerece",
+            "certificate_hash": "f326594c0cf3e6abb4a89dde404c348a5922a2d3"
+          }
+        },
+        {
+          "client_id": "566420392439-9vld6bhma2dpf5jfiv4lj5atsknjmkod.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNOm8eylkK73pttxZL9yFeFAzLY5zAPUY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "566420392439-9vld6bhma2dpf5jfiv4lj5atsknjmkod.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

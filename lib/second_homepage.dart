@@ -3,14 +3,17 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:e_comerece/Json/Product.dart';
 import 'package:e_comerece/Partial/TouchableOpacity.dart';
-import 'package:e_comerece/category_page_old.dart';
+import 'package:e_comerece/category_page.dart';
 import 'package:e_comerece/description.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import 'Json/Brand.dart';
+import 'Json/Category.dart';
+import 'Json/User.dart';
 import 'SuperBase.dart';
 import 'item.dart';
 import 'cart_page.dart';
@@ -24,8 +27,9 @@ class Choice{
 
 class SecondHomepage extends StatefulWidget {
   final GlobalKey<CartScreenState> cartState;
+  final void Function(User user) callback;
 
-  const SecondHomepage({Key key, @required this.cartState}) : super(key: key);
+  const SecondHomepage({Key key, @required this.cartState, this.callback}) : super(key: key);
 
   @override
   _SecondHomepageState createState() => _SecondHomepageState();
@@ -51,7 +55,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
 
   var _control = new GlobalKey<RefreshIndicatorState>();
 
-  List<Item> _items = [];
+  List<Product> _products = [];
   List<String> _urls = [];
 
   int max;
@@ -99,6 +103,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       this._loadBrands();
+      this._loadCategories();
       this._refreshList(inc: true);
     });
 
@@ -112,12 +117,12 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
 
   Future<void> _loadBrands() {
     return this.ajax(
-        url: "brands/list",
+        url: "listBrands",
         auth: false,
         onValue: (source, url) {
           Iterable _map = json.decode(source);
           setState(() {
-            //_brands = _map.map((f) => Brand.fromJson(f)).toList();
+            _brands = _map.map((f) => Brand.fromJson(f)).toList();
           });
         },
         error: (s, v) {
@@ -125,31 +130,45 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
         });
   }
 
+  Future<void> _loadCategories() {
+    return this.ajax(
+        url: "listCategories?page=0&size=8",
+        auth: false,
+        onValue: (source, url) {
+          Iterable _map = json.decode(source);
+          setState(() {
+            _categories = _map.map((f) => Category.fromJson(f)).toList();
+          });
+        },
+        error: (s, v) {
+          print(s);
+        });
+  }
+
+  List<Category> _categories = <Category>[];
+
   Future<void> _loadItems({bool inc: false}) {
     if (max != null && current > max) {
       return Future.value();
     }
-    current += inc ? 1 : 0;
     setState(() {
       _loading = true;
     });
     return this.ajax(
         url:
-            "https://dev.diaosaas.com/zion/itemStation/queryAll?pageNum=$current&pageSize=12",
-        absolutePath: true,
+            "listAllProducts?pageNo=$current&pageSize=12",
         auth: false,
-        localSave: true,
+        server: true,
         onValue: (source, url) {
           if (_urls.contains(url)) {
             return;
           }
+          current += inc ? 1 : 0;
           _urls.add(url);
           //print("Whispa sent requests ($current): $url");
-          Map<String, dynamic> _data = json.decode(source);
-          Iterable _map = _data['data']['list'];
-          max = _data['pages'];
+          Iterable _map = json.decode(source);
           setState(() {
-            _items.addAll(_map.map((f) => Item.fromJson(f)).toList());
+            _products.addAll(_map.map((f) => Product.fromJson(f)).toList());
           });
         },
         onEnd: () {
@@ -157,15 +176,12 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
             _loading = false;
           });
         },
-        error: (s, v) {});
+        error: (s, v) {
+          print(" error vegan : $s");
+        });
   }
 
-  List<Brand> get _brands => [
-        Brand("H&M", "assets/imag4.JPG"),
-        Brand("NIKE", "assets/imag5.JPG"),
-        Brand("ZARA", "assets/imag6.JPG"),
-        Brand("ADIDAS", "assets/imag7.JPG"),
-      ];
+  List<Brand> _brands = [];
 
   Future<void> _refreshList({bool inc: false}) {
     _control.currentState?.show(atTop: true);
@@ -185,13 +201,6 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
         "https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/s750x750/87217612_496685841234077_5209662721745286314_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=105&_nc_ohc=b4jtZZhqwysAX8wgeJn&oh=57f7f6bb9d340f6910a4078eaaa477b1&oe=5E9F1EC1"
       ];
 
-  List<String> get _logos => [
-        "https://therockbury.com/wp-content/uploads/2014/03/HM-logo.jpg",
-        "https://coatsdigital.com/wp-content/uploads/2015/03/adidas-logo.png",
-        "https://www.fashionabc.org/wp-content/uploads/2019/08/zara-square-logo-300x300.jpg",
-        "https://uniqgiftvoucher.com/ugvwp/wp-content/uploads/2019/08/Puma-Logo.png",
-        "https://i.insider.com/53d29d5c6bb3f7a80617ada8?width=1100&format=jpeg&auto=webp",
-      ];
 
   @override
   Widget build(BuildContext context) {
@@ -303,75 +312,75 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                             margin: EdgeInsets.symmetric(vertical: 20),
                             child: Column(
                               children: <Widget>[
-                                Row(
-                                  children: [
-                                    Choice("Men", "https://cdn.shopify.com/s/files/1/1083/6796/products/product-image-907350420_1024x1024.jpg?v=1571439643"),
-                                    Choice("Women", "https://i.pinimg.com/originals/18/45/69/1845698cafa91c626a861c84974de35c.jpg"),
-                                    Choice("Children", "https://shop.r10s.jp/angeliebe/cabinet/baby-19aw/s/50985_s.jpg"),
-                                    Choice("Afrihome", "https://instagram.fkgl2-2.fna.fbcdn.net/v/t51.2885-15/sh0.08/e35/p750x750/84535995_791866094655814_2932203803652796901_n.jpg?_nc_ht=instagram.fkgl2-2.fna.fbcdn.net&_nc_cat=110&_nc_ohc=J7WDulYzj08AX8WB7FW&oh=1f32a4815b609c7fdea35bb901e7ed16&oe=5E9F6074"),
-                                  ]
-                                      .map((f) => Expanded(
-                                              child: Container(
-                                            child: Column(
-                                              children: <Widget>[
-                                                CircleAvatar(
-                                                  radius: 30,
-                                                  backgroundColor: color,
-                                                  backgroundImage: CachedNetworkImageProvider(f.address),
-                                                ),
-                                                SizedBox(height: 7),
-                                                Text(
-                                                  f.name,
-                                                  style:
-                                                      TextStyle(fontSize: 12.5),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                )
-                                              ],
-                                            ),
-                                          )))
+                                GridView(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+                                  children: _categories.asMap().map((k,f)=>MapEntry(k, InkWell(
+                                      onTap: (){
+                                        Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>CategoryScreen()));
+                                      },child:Container(
+                                    child: Column(
+                                      children: <Widget>[
+                                        CircleAvatar(
+                                          radius: 30,
+                                          backgroundColor: k+1 == _categories.length ? color : Colors.grey,
+                                          child: k+1 == _categories.length ? Icon(Icons.more_horiz) : null,
+                                          backgroundImage: k+1 == _categories.length ? null : CachedNetworkImageProvider(f.url),
+                                        ),
+                                        SizedBox(height: 7),
+                                        Text(
+                                          f.name,
+                                          style:
+                                          TextStyle(fontSize: 12.5),
+                                          maxLines: 1,
+                                          overflow:
+                                          TextOverflow.ellipsis,
+                                        )
+                                      ],
+                                    ),
+                                  )))).values
                                       .toList(),
                                 ),
-                                SizedBox(height: 18),
-                                Row(
-                                  children: [
-                                    Choice("Cosmetics", "https://shatelcosmetics.com/wp-content/uploads/2017/06/cosmetic-png-1.png"),
-                                    Choice("Electronics", "https://ksassets.timeincuk.net/wp/uploads/sites/54/2019/03/Xiaomi-Mi-9-front-angled-top-left-1024x683.jpg"),
-                                    Choice("Hair", "https://main-cdn.grabone.co.nz/goimage/fullsize/6c0f1cd498157e4d7352f3600f29c6f90cc9c80b.jpg"),
-                                    Choice("View all", "https://shatelcosmetics.com/wp-content/uploads/2017/06/cosmetic-png-1.png"),
-                                  ]
-                                      .map((f) => Expanded(
-                                              child: GestureDetector(
-                                                onTap: (){
-                                                    Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>CategoryScreen()));
-                                                },
-                                                child: Container(
-                                                  child: Column(
-                                                    children: <Widget>[
-                                                      CircleAvatar(
-                                                        backgroundColor: f.name == "View all" ? color : Colors.grey,
-                                                        radius: 30,
-                                                        backgroundImage: f.name == "View all" ? null : CachedNetworkImageProvider(f.address),
-                                                        child: f.name == "View all"
-                                                            ? Icon(Icons.more_horiz)
-                                                            : null,
-                                                      ),
-                                                      SizedBox(height: 7),
-                                                      Text(
-                                                        f.name,
-                                                        style:
-                                                        TextStyle(fontSize: 12.5),
-                                                        maxLines: 1,
-                                                        overflow:
-                                                        TextOverflow.ellipsis,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              )))
-                                      .toList(),
-                                ),
+//                                SizedBox(height: 18),
+//                                Row(
+//                                  children: [
+//                                    Choice("Cosmetics", "https://shatelcosmetics.com/wp-content/uploads/2017/06/cosmetic-png-1.png"),
+//                                    Choice("Electronics", "https://ksassets.timeincuk.net/wp/uploads/sites/54/2019/03/Xiaomi-Mi-9-front-angled-top-left-1024x683.jpg"),
+//                                    Choice("Hair", "https://main-cdn.grabone.co.nz/goimage/fullsize/6c0f1cd498157e4d7352f3600f29c6f90cc9c80b.jpg"),
+//                                    Choice("View all", "https://shatelcosmetics.com/wp-content/uploads/2017/06/cosmetic-png-1.png"),
+//                                  ]
+//                                      .map((f) => Expanded(
+//                                              child: GestureDetector(
+//                                                onTap: (){
+//                                                    Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>CategoryScreen()));
+//                                                },
+//                                                child: Container(
+//                                                  child: Column(
+//                                                    children: <Widget>[
+//                                                      CircleAvatar(
+//                                                        backgroundColor: f.name == "View all" ? color : Colors.grey,
+//                                                        radius: 30,
+//                                                        backgroundImage: f.name == "View all" ? null : CachedNetworkImageProvider(f.address),
+//                                                        child: f.name == "View all"
+//                                                            ? Icon(Icons.more_horiz)
+//                                                            : null,
+//                                                      ),
+//                                                      SizedBox(height: 7),
+//                                                      Text(
+//                                                        f.name,
+//                                                        style:
+//                                                        TextStyle(fontSize: 12.5),
+//                                                        maxLines: 1,
+//                                                        overflow:
+//                                                        TextOverflow.ellipsis,
+//                                                      )
+//                                                    ],
+//                                                  ),
+//                                                ),
+//                                              )))
+//                                      .toList(),
+//                                ),
                               ],
                             ),
                           );
@@ -390,7 +399,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                                   height: 110,
                                   color: color,
                                   child: ListView.builder(
-                                      itemCount: _logos.length,
+                                      itemCount: _brands.length,
                                       scrollDirection: Axis.horizontal,
                                       itemBuilder: (context, index) {
                                         return Padding(
@@ -413,7 +422,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                                                 image: DecorationImage(
                                                     fit: BoxFit.cover,
                                                     image:
-                                                    CachedNetworkImageProvider(_logos[index]))),
+                                                    CachedNetworkImageProvider( _brands[index].url))),
                                           ),
                                         );
                                       }),
@@ -501,10 +510,10 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                           physics: NeverScrollableScrollPhysics(),
                           padding: EdgeInsets.all(5),
                           crossAxisCount: 4,
-                          itemCount: _items.length,
+                          itemCount: _products.length,
                           itemBuilder: (BuildContext context, int index) => GestureDetector(
                             onTap: ()async{
-                              await Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>Description(item: _items[index],)));
+                              await Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>Description(product: _products[index],)));
                               widget.cartState.currentState?.loadItems();
                               },
                             child: ClipRRect(
@@ -530,7 +539,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                                               topLeft: Radius.circular(5.0),
                                               topRight: Radius.circular(5.0)),
                                           child: Image(
-                                            image:CachedNetworkImageProvider(_items[index].url),
+                                            image:CachedNetworkImageProvider(_products[index].url),
                                             fit: BoxFit.fitWidth,
                                             frameBuilder: (BuildContext context, Widget child,
                                                 int frame, bool wasSynchronouslyLoaded) {
@@ -566,7 +575,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                                             padding: EdgeInsets.symmetric(
                                                 vertical: 5, horizontal: 5),
                                             child: Text(
-                                              _items[index].title,
+                                              _products[index].name,
                                               maxLines: 2,overflow: TextOverflow.ellipsis,
                                               style: TextStyle(fontSize: 12),
                                             )),
@@ -574,7 +583,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                                             padding:
                                             EdgeInsets.only(bottom: 7, right: 5, left: 5),
                                             child: Text(
-                                              '\$${_items[index].price}',
+                                              '\$${_products[index].price}',
                                               style: TextStyle(fontSize: 17,fontWeight: FontWeight.w700),
                                             )),
                                       ],
@@ -626,13 +635,13 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
   Widget _gridItem(String title, String url, double price,
       {int count: 0, int index: 0}) {
     index = (index * 3) + count;
-    return _items.length <= index
+    return _products.length <= index
         ? Container()
         : TouchableOpacity(
             padding: EdgeInsets.all(5),
             onTap: () async {
               await Navigator.of(context).push(CupertinoPageRoute(
-                  builder: (context) => Description(item: _items[index])));
+                  builder: (context) => Description(product: _products[index])));
               widget.cartState.currentState?.loadItems();
             },
             child: Container(
@@ -645,7 +654,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                       child: Container(
                     constraints: BoxConstraints(minWidth: double.infinity),
                     child: Image(
-                      image: CachedNetworkImageProvider('${_items[index].url}'),
+                      image: CachedNetworkImageProvider('${_products[index].url}'),
                       fit: BoxFit.cover,
                       loadingBuilder: (BuildContext context, Widget child,
                           ImageChunkEvent loadingProgress) {
@@ -665,7 +674,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                   Padding(
                       padding: EdgeInsets.all(5),
                       child: Text(
-                        '${_items[index].title}',
+                        '${_products[index].name}',
                         style: TextStyle(
                             color: Color(0xff4d4d4d),
                             fontWeight: FontWeight.bold),
@@ -675,7 +684,7 @@ class _SecondHomepageState extends State<SecondHomepage> with SuperBase {
                   Padding(
                       padding: EdgeInsets.symmetric(horizontal: 5),
                       child: Text(
-                        '\$${_items[index].price}',
+                        '\$${_products[index].price}',
                         style: TextStyle(color: Color(0xffCDCDCD)),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

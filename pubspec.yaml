@@ -29,6 +29,9 @@ dependencies:
   carousel_slider: ^1.4.1
   flutter_staggered_grid_view: ^0.3.0
   dio: ^2.1.13
+  firebase_auth: ^0.15.5+3
+  pin_code_text_field: ^1.5.1
+  flutter_country_picker: ^0.1.6
   contacts_service: ^0.3.10
   permission_handler: ^3.1.0
   url_launcher: ^5.0.3
@@ -53,24 +56,31 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-   - assets/image.jpg
    - assets/home_banner@3x.png
    - assets/afrishop_logo@3x.png
-   - assets/imag1.JPG
-   - assets/avatar04.png
-   - assets/imag2.JPG
-   - assets/imag3.JPG
-   - assets/imag4.JPG
-   - assets/imag5.JPG
-   - assets/imag6.JPG
-   - assets/imag7.JPG
+   - assets/boys.jpg
+   - assets/home.png
+   - assets/home_.png
+   - assets/discover.png
+   - assets/discover_.png
+   - assets/clement.jpeg
+   - assets/cart.png
+   - assets/cart_.png
+   - assets/flutterwave.png
+   - assets/dpo.jpg
+   - assets/image.jpg
+   - assets/imag1.jpg
+   - assets/imag2.jpg
+   - assets/imag3.jpg
+   - assets/imag4.jpg
+   - assets/imag5.jpg
+   - assets/imag6.jpg
+   - assets/imag7.jpg
    - assets/imag8.png
    - assets/imag9.png
-   - assets/imag10.JPG
-   - assets/home_logo.png
-   - assets/discover.png
-   - assets/cart_logo.png
+   - assets/imag10.jpg
    - assets/account.png
+   - assets/account_.png
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -84,11 +94,13 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
+  fonts:
+   - family: Karla
+     fonts:
+          - asset: fonts/Karla-Bold.ttf
+          - asset: fonts/Karla-BoldItalic.ttf
+          - asset: fonts/Karla-Italic.ttf
+          - asset: fonts/Karla-Regular.ttf
   #         style: italic
   #   - family: Trajan Pro
   #     fonts:

@@ -16,16 +16,22 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'Json/User.dart';
+
 
 class SuperBase {
-  String server = "https://dev.diaosaas.com/zion/";
+  String server = "http://165.22.82.105:8080/";
   String server0 = "http://172.20.10.13:8080/afri_shop/";
   String socket = "ws://172.20.10.13:8080/afri_shop/";
   String jwtKey = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiV2hpc3BhIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU4NjgwNjM0OCwiYXV0aG9yaXRpZXMiOlsiU1RBTkRBUkRfVVNFUiJdLCJqdGkiOiJiOTI3ZTcwNi0yOGNiLTRmN2MtYWEwNS00N2JkNjYxZDg1ZDAiLCJjbGllbnRfaWQiOiJ3aGlzcGFqd3RjbGllbnRpZCJ9.cqBA3timG1yf8Q5wRVKyYlpwu2omdr2chgnLbzpyqh8';
   String idKeyUser = 'id-user-data-BASE64-key-123';
   String idKey = 'user-id-23';
   String jwt = '';
-  static const platform = const MethodChannel('app.channel.shared.data');
+
+  RegExp reg = new RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+  Function mathFunc = (Match match) => '${match[1]},';
+
+  var platform = MethodChannel('app.channel.shared.data');
   ImageProvider def = AssetImage(
     'assets/boys.jpg',
   );
@@ -55,13 +61,23 @@ class SuperBase {
       onCreate: (db, version) async {
         // Run the CREATE TABLE statement on the database.db.
         return db.execute(
-            "CREATE TABLE cart(id INTEGER PRIMARY KEY AUTOINCREMENT,itemId TEXT NOT NULL UNIQUE,items int,count int,title TEXT,price double,url TEXT)");
+            "CREATE TABLE cart(id INTEGER NOT NULL UNIQUE,items int,count int,title TEXT,price double,url TEXT,color TEXT,size TEXT)");
       },
       // Set the version. This executes the onCreate function and provides a
       // path to perform database upgrades and downgrades.
       version: 1,
     );
   }
+
+
+  String fmt(String test){
+    return test.replaceAllMapped(reg, mathFunc);
+  }
+
+  String fmtNbr(num test){
+    return fmt(test.toString());
+  }
+
 
   final scope = const <String>[
     'email',
@@ -119,6 +135,19 @@ class SuperBase {
   }
 
 
+
+  void signedIn(void Function(String token, User user) function,void Function() not) {
+    prefs.then((SharedPreferences prf) {
+      String b = prf.get(jwtKey);
+      String v = prf.get(idKeyUser);
+
+      if (v != null) {
+        Map<String, dynamic> _map = json.decode(v);
+        function(b, User.fromJson(_map));
+      } else
+        not();
+    });
+  }
 
   void auth(String jwt, String user, String id) {
     prefs.then((SharedPreferences prf) {

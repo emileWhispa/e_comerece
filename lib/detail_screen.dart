@@ -1,13 +1,11 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:e_comerece/item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'Json/Product.dart';
 import 'Json/SubCategory.dart';
-import 'Partial/TouchableOpacity.dart';
 import 'SuperBase.dart';
 import 'description.dart';
 
@@ -34,7 +32,7 @@ class _DetailScreenState extends State<DetailScreen> with SuperBase {
   Future<void> _refreshList() {
     _control.currentState?.show(atTop: true);
     return this.ajax(
-        url: "products/by/category/${widget.category?.id}/",
+        url: "listProductsByCategory?categoryId=${widget.category?.id}&pageNo=0&pageSize=30",
         onValue: (source, url) {
           Iterable _map = json.decode(source);
           setState(() {
@@ -73,17 +71,17 @@ class _DetailScreenState extends State<DetailScreen> with SuperBase {
                 child: ListView.builder(
                     itemCount: _products.length,
                     itemBuilder: (context, index) {
-                      return TouchableOpacity(
-                        onTap: () {
-                          Navigator.of(context).push(CupertinoPageRoute(
-                              builder: (context) => Description(
-                                    key: UniqueKey(),
-                                    item: Item(_products[index].price, _products[index].name, _products[index].url,100),
-                                  )));
-                        },
-                        child: Card(
+                      return Card(
                           elevation: 1.0,
-                          child: Container(
+                          child:InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(CupertinoPageRoute(
+                                  builder: (context) => Description(
+                                    key: UniqueKey(),
+                                    product: _products[index],
+                                  )));
+                            },
+                            child: Container(
                             padding: EdgeInsets.all(10),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +89,7 @@ class _DetailScreenState extends State<DetailScreen> with SuperBase {
                                 CachedNetworkImage(
                                   height: 100,
                                   width: 100,
-                                  imageUrl: _products[index].url,
+                                  imageUrl: '${_products[index].url}',
                                   fit: BoxFit.cover,
                                   placeholder: (context, i) => Center(
                                     child: Container(

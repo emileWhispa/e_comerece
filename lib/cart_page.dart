@@ -1,27 +1,37 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
+import 'package:e_comerece/Json/Product.dart';
+import 'package:e_comerece/PaymentScreen.dart';
 import 'package:e_comerece/description.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'Authorization.dart';
+import 'Json/User.dart';
 import 'SuperBase.dart';
-import 'item.dart';
+import 'complete_order.dart';
 
 class CartScreen extends StatefulWidget {
-  const CartScreen({Key key}) : super(key: key);
+  final User user;
+  final void Function(User user) callback;
+  const CartScreen({Key key,@required this.user, this.callback}) : super(key: key);
 
   @override
   CartScreenState createState() => CartScreenState();
 }
 
 class CartScreenState extends State<CartScreen> with SuperBase {
-  List<Item> _list = [];
+  List<Product> _list = [];
   _SearchDelegate _delegate = new _SearchDelegate();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _user = widget.user;
     WidgetsBinding.instance.addPostFrameCallback((_) => this.loadItems());
   }
 
@@ -31,7 +41,7 @@ class CartScreenState extends State<CartScreen> with SuperBase {
   Future<void> loadItems() async {
     _control.currentState?.show(atTop: true);
     await open();
-    _list = await Item.itemList(db);
+    _list = await Product.itemList(db);
     setState(() {});
     return Future.value();
   }
@@ -76,7 +86,7 @@ class CartScreenState extends State<CartScreen> with SuperBase {
                   height: 10,
                 ),
                 Text(
-                  list.map((f) => f.title).join(", "),
+                  list.map((f) => f.name).join(", "),
                   maxLines:
                   MediaQuery.of(build).orientation == Orientation.portrait
                       ? 20
@@ -111,7 +121,12 @@ class CartScreenState extends State<CartScreen> with SuperBase {
         });
   }
 
-  void deleter(List<Item> list)async{
+
+  User _user;
+  bool _addingToCart = false;
+
+
+  void deleter(List<Product> list)async{
     for(int i=0;i<list.length;i++) {
       await list[i].deleteItem(db);
     }
@@ -121,33 +136,39 @@ class CartScreenState extends State<CartScreen> with SuperBase {
     });
   }
 
+  Widget get _appBar => AppBar(
+    title: Text("Cart"),
+    elevation: 2.0,
+    centerTitle: true,
+    actions: <Widget>[
+      IconButton(icon: Icon(Icons.search), onPressed: () {
+        showSearch(context: context, delegate: _delegate);
+      }),
+      IconButton(
+          icon: Icon(Icons.delete),
+          onPressed: () {
+            if (!_select) {
+              setState(() {
+                _select = true;
+              });
+            } else {
+              // Delete here
+              deleteModal();
+            }
+          })
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Cart"),
-          elevation: 2.0,
-          centerTitle: true,
-          actions: <Widget>[
-            IconButton(icon: Icon(Icons.search), onPressed: () {
-              showSearch(context: context, delegate: _delegate);
-            }),
-            IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: () {
-                  if (!_select) {
-                    setState(() {
-                      _select = true;
-                    });
-                  } else {
-                    // Delete here
-                    deleteModal();
-                  }
-                })
-          ],
+        appBar: CupertinoNavigationBar(
+          backgroundColor: color,
+          leading: Image.asset("assets/afrishop_logo@3x.png",width: 70,),
+          middle: Text("Cart",style: TextStyle(fontWeight: FontWeight.bold),),
+          trailing: Text("Management",style: TextStyle(fontWeight: FontWeight.bold)),
         ),
-        backgroundColor: Colors.black12,
         body: Column(
           children: <Widget>[
             Expanded(
@@ -165,7 +186,7 @@ class CartScreenState extends State<CartScreen> with SuperBase {
                               borderRadius: BorderRadius.circular(3)),
                           child: InkWell(
                             onTap: () async {
-                              await Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>Description(item: _item)));
+                              await Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>Description(product: _item)));
                               loadItems();
                             },
                             child: Row(
@@ -195,7 +216,7 @@ class CartScreenState extends State<CartScreen> with SuperBase {
                                     children: <Widget>[
                                       Expanded(
                                           child: Text(
-                                        _item.title,
+                                        _item.name,
                                         maxLines: 3,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
@@ -286,12 +307,24 @@ class CartScreenState extends State<CartScreen> with SuperBase {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Expanded(child: SizedBox.shrink()),
-                  RaisedButton(
-                      color: Color(0xffffe707),
+                  _addingToCart ? CircularProgressIndicator() : RaisedButton(
+                      color: color,
                       child: Text("Complete Order"),
                       padding:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      onPressed: () {})
+                      onPressed: ()async{
+                        var a = true;
+                        if( a ) return;
+                        if( _user == null ){
+                          _user = await Navigator.of(context).push(CupertinoPageRoute(builder: (context)=>Authorization()));
+                          if( widget.callback != null && _user != null) widget.callback(_user);
+                          setState(() {
+
+                          });
+                        }
+                        if( _user != null)
+                          Navigator.push(context, CupertinoPageRoute(builder: (context)=>CompleteOrder(user: _user,list: _list,)));
+                      })
                 ],
               ),
             ),

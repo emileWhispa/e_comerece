@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SuperBase {
   @override
   void initState() {
     // TODO: implement initState
-    requestUrl = "listImages.php?duo_never=rtrit" + widget.user.id;
+    requestUrl = "listImages.php?duo_never=rtrit${widget.user.id}";
     WidgetsBinding.instance.addPostFrameCallback((_) => this.requestImages());
 
     super.initState();
@@ -130,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SuperBase {
                               children: <Widget>[
                                 CircleAvatar(
                                   radius: 55,
-                                  backgroundImage:AssetImage("assets/avatar04.png"),
+                                  backgroundImage:AssetImage("assets/boys.jpg"),
                                 ),
                                 Positioned(
                                   child: Container(

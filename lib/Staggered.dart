@@ -113,7 +113,7 @@ class _StaggeredState extends State<Staggered> with SuperBase {
                   });
                   this.save(url(requestUrl), _list);
                 },
-                user: User("12", "Wgusoa", "Emile", "Username whispa", "077621709", "345", "Status", "[arty", "Admin"),
+                user: User(12, "Wgusoa", "Emile", "Username whispa", "077621709"),
               )),
           onRefresh: _refresh),
     );
